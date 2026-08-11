@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>HW2 Chat</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            max-width: 600px;
+            margin: 2rem auto;
+        }
+
+        #out {
+            white-space: pre-wrap;
+            border: 1px solid #ccc;
+            padding: 1rem;
+            min-height: 100px;
+            margin-top: 1rem;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>HW2 Chat</h1>
+    <input id="msg" size="50" placeholder="Type a message...">
+    <button onclick="send()">Send</button>
+    <div id="out"></div>
+
+    <script>
+        async function send() {
+            const out = document.getElementById("out");
+            out.textContent = "";
+            const res = await fetch("/api/chat", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ user_msg: document.getElementById("msg").value, history: [] }),
+            });
+            const reader = res.body.getReader();
+            const decoder = new TextDecoder();
+            let buffer = "";
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+                buffer += decoder.decode(value, { stream: true });
+                const events = buffer.split("\n\n");
+                buffer = events.pop();
+                for (const ev of events) {
+                    for (const line of ev.split("\n")) {
+                        if (!line.startsWith("data:")) continue;
+                        const payload = line.slice(5).trimStart();
+                        if (payload === "[DONE]") return;
+                        out.textContent += JSON.parse(payload);
+                    }
+                }
+            }
+        }
+    </script>
+</body>
+
+</html>
