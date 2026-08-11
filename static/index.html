@@ -50,7 +50,8 @@
                         if (!line.startsWith("data:")) continue;
                         const payload = line.slice(5).trimStart();
                         if (payload === "[DONE]") return;
-                        out.textContent += JSON.parse(payload);
+                        const parsed = JSON.parse(payload);
+                        out.textContent += typeof parsed === "string" ? parsed : JSON.stringify(parsed);
                     }
                 }
             }
