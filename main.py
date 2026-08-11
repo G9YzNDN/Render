@@ -39,7 +39,7 @@ def chat(req: ChatRequest):
     def event_stream():
         try:
             stream = client.chat.completions.create(
-                model="gpt-4o-mini",  # use whatever model your proxy supports
+                model="gemma-4-E4B-it",  # use whatever model your proxy supports
                 messages=messages,
                 stream=True,
             )
